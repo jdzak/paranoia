@@ -8,7 +8,7 @@ module Paranoia
 
     def only_deleted
       unscoped {
-        where("deleted_at is not null")
+        where('is_deleted' => 'Y')
       }
     end
   end
@@ -18,16 +18,16 @@ module Paranoia
   end
 
   def delete    
-    self.update_attribute(:deleted_at, Time.now) if !deleted? && persisted?
+    self.update_attribute(:is_deleted, 'Y') if !deleted? && persisted?
     freeze
   end
   
   def restore!
-    update_attribute :deleted_at, nil
+    update_attribute :is_deleted, nil
   end
 
   def destroyed?
-    !self.deleted_at.nil?
+    self.is_deleted == 'Y'
   end
   alias :deleted? :destroyed?
 end
@@ -37,7 +37,8 @@ class ActiveRecord::Base
     alias_method :destroy!, :destroy
     alias_method :delete!,  :delete
     include Paranoia
-    default_scope :conditions => { :deleted_at => nil }
+
+    default_scope where("is_deleted IS ? or is_deleted = ?", nil, 'N')
   end
 
   def self.paranoid? ; false ; end
