@@ -37,8 +37,8 @@ class ActiveRecord::Base
     alias_method :destroy!, :destroy
     alias_method :delete!,  :delete
     include Paranoia
-
-    default_scope where("is_deleted IS ? or is_deleted = ?", nil, 'N')
+    t = arel_table
+    default_scope where(t[:is_deleted].eq(nil).or(t[:is_deleted].eq('N')))
   end
 
   def self.paranoid? ; false ; end
